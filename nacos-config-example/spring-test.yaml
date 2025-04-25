@@ -1,0 +1,15 @@
+app:
+  name: Spring Test Application with Nacos
+  description: Application configured via Nacos Configuration Center
+  database:
+    url: jdbc:mysql://localhost:3306/testdb
+    username: dbuser
+    password: dbpass
+    max-pool-size: 20
+
+# 自定义属性
+nacos:
+  config:
+    import-timestamp: 2025-04-24
+    description: "这是从Nacos导入的配置"
+    environment: dev

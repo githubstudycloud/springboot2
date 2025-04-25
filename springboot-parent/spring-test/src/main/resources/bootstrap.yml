@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: spring-test
+  cloud:
+    nacos:
+      # 配置中心
+      config:
+        server-addr: 127.0.0.1:8848
+        file-extension: yaml
+        namespace: public
+        group: DEFAULT_GROUP
+        refresh-enabled: true
+      # 服务发现
+      discovery:
+        server-addr: 127.0.0.1:8848
+        namespace: public
+        group: DEFAULT_GROUP
+  # 支持多套环境配置
+  profiles:
+    active: dev
+
+# 仅用于在配置服务器不可用时的回退配置
+app:
+  name: Default App
+  description: This is a fallback configuration (Nacos unavailable)
+  database:
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password: 
+    max-pool-size: 10

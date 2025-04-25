@@ -1,0 +1,14 @@
+app:
+  name: Spring Test Application (PROD)
+  description: Production Environment Configuration
+  database:
+    url: jdbc:mysql://prod-server:3306/testdb_prod
+    username: prod_user
+    password: prod_pass
+    max-pool-size: 50
+
+nacos:
+  config:
+    import-timestamp: 2025-04-24
+    description: "生产环境配置"
+    environment: prod

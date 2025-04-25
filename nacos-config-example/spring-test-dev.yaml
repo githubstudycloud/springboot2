@@ -1,0 +1,14 @@
+app:
+  name: Spring Test Application (DEV)
+  description: Development Environment Configuration
+  database:
+    url: jdbc:mysql://localhost:3306/testdb_dev
+    username: dev_user
+    password: dev_pass
+    max-pool-size: 10
+
+nacos:
+  config:
+    import-timestamp: 2025-04-24
+    description: "开发环境配置"
+    environment: dev

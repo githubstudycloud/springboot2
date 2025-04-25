@@ -1,0 +1,20 @@
+server:
+  port: 8080
+
+# 启用Actuator端点
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'  # 暴露所有端点
+  endpoint:
+    health:
+      show-details: always
+
+# 日志配置
+logging:
+  level:
+    com.alibaba.nacos: INFO
+    com.alibaba.cloud: INFO
+    org.springframework.boot: INFO
+    com.example.test: DEBUG

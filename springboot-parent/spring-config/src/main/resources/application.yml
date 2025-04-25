@@ -1,0 +1,34 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://gitlab.com/your-username/config-repo  # 替换为你的GitLab配置仓库地址
+          username: your-username  # 替换为你的GitLab用户名
+          password: your-password  # 替换为你的GitLab密码或访问令牌
+          default-label: main  # 默认分支名称，根据你的仓库设置调整
+          search-paths: '{application}'  # 搜索路径模式
+          clone-on-start: true  # 启动时克隆
+          timeout: 10  # Git操作超时时间（秒）
+          basedir: target/config-repo  # 本地Git仓库路径
+
+# 启用Actuator端点
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'  # 暴露所有端点，生产环境建议限制
+  endpoint:
+    health:
+      show-details: always
+
+# 日志配置
+logging:
+  level:
+    org.springframework.cloud.config: DEBUG
+    org.springframework.boot: INFO
