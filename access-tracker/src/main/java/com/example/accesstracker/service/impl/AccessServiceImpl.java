@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -32,41 +32,52 @@ public class AccessServiceImpl implements AccessService {
     @Override
     @Async
     @Transactional
-    public boolean recordAccess(String logUser, String uuid) {
+    public boolean recordAccess(String logUser, String uuid, String projectId, String versionpbi) {
         try {
             LocalDate today = LocalDate.now();
-            LocalTime currentTime = LocalTime.now();
+            LocalDateTime currentDateTime = LocalDateTime.now();
             
             // Check and update LastAccess table
-            LastAccess lastAccess = lastAccessDao.getByUser(logUser);
+            LastAccess lastAccess = lastAccessDao.getByUserAndProject(logUser, projectId, versionpbi);
+            
             if (lastAccess == null) {
                 // Create new LastAccess record
                 lastAccess = new LastAccess();
                 lastAccess.setLogUser(logUser);
                 lastAccess.setUuid(uuid);
+                lastAccess.setProjectId(projectId);
+                lastAccess.setVersionpbi(versionpbi);
                 lastAccess.setAccessDate(today);
-                lastAccess.setStartTime(currentTime);
-                lastAccess.setEndTime(currentTime);
+                lastAccess.setFirstAccessTime(currentDateTime);
+                lastAccess.setLastAccessTime(currentDateTime);
                 lastAccessDao.insert(lastAccess);
             } else {
-                // Update existing LastAccess record
+                // Update existing LastAccess record - only update the last access time
                 lastAccess.setUuid(uuid);
                 lastAccess.setAccessDate(today);
-                lastAccess.setStartTime(currentTime);
-                lastAccess.setEndTime(currentTime);
+                lastAccess.setLastAccessTime(currentDateTime);
                 lastAccessDao.update(lastAccess);
             }
             
-            // Check and update HistoryAccess table (one record per user per day)
-            boolean hasHistoryForToday = historyAccessDao.hasHistoryForDate(logUser, today);
+            // Check and update HistoryAccess table (one record per user per day per project+version)
+            boolean hasHistoryForToday = historyAccessDao.hasHistoryForDate(logUser, projectId, versionpbi, today);
+            
             if (!hasHistoryForToday) {
+                // Create new history record for today
                 HistoryAccess historyAccess = new HistoryAccess();
                 historyAccess.setLogUser(logUser);
                 historyAccess.setUuid(uuid);
+                historyAccess.setProjectId(projectId);
+                historyAccess.setVersionpbi(versionpbi);
                 historyAccess.setAccessDate(today);
-                historyAccess.setStartTime(currentTime);
-                historyAccess.setEndTime(currentTime);
+                historyAccess.setFirstAccessTime(currentDateTime);
+                historyAccess.setLastAccessTime(currentDateTime);
                 historyAccessDao.insert(historyAccess);
+            } else {
+                // Update the last access time for today's record
+                HistoryAccess historyAccess = historyAccessDao.getByUserProjectAndDate(logUser, projectId, versionpbi, today);
+                historyAccess.setLastAccessTime(currentDateTime);
+                historyAccessDao.updateLastAccessTime(historyAccess);
             }
             
             return true;
@@ -80,15 +91,24 @@ public class AccessServiceImpl implements AccessService {
     @Override
     @Async
     @Transactional
-    public boolean updateEndTime(String logUser, String uuid) {
+    public boolean updateEndTime(String logUser, String uuid, String projectId, String versionpbi) {
         try {
-            LocalTime currentTime = LocalTime.now();
+            LocalDateTime currentDateTime = LocalDateTime.now();
             
             // Update LastAccess end time
-            LastAccess lastAccess = lastAccessDao.getByUser(logUser);
+            LastAccess lastAccess = lastAccessDao.getByUserAndProject(logUser, projectId, versionpbi);
             if (lastAccess != null && lastAccess.getUuid().equals(uuid)) {
-                lastAccess.setEndTime(currentTime);
+                lastAccess.setLastAccessTime(currentDateTime);
                 lastAccessDao.update(lastAccess);
+                
+                // Also update HistoryAccess end time for today
+                LocalDate today = LocalDate.now();
+                HistoryAccess historyAccess = historyAccessDao.getByUserProjectAndDate(logUser, projectId, versionpbi, today);
+                if (historyAccess != null) {
+                    historyAccess.setLastAccessTime(currentDateTime);
+                    historyAccessDao.updateLastAccessTime(historyAccess);
+                }
+                
                 return true;
             }
             
@@ -104,10 +124,20 @@ public class AccessServiceImpl implements AccessService {
     public LastAccess getLastAccess(String logUser) {
         return lastAccessDao.getByUser(logUser);
     }
+    
+    @Override
+    public LastAccess getLastAccessByUserAndProject(String logUser, String projectId, String versionpbi) {
+        return lastAccessDao.getByUserAndProject(logUser, projectId, versionpbi);
+    }
 
     @Override
     public List<HistoryAccess> getUserHistory(String logUser) {
         return historyAccessDao.getAllByUser(logUser);
+    }
+    
+    @Override
+    public List<HistoryAccess> getProjectHistory(String projectId) {
+        return historyAccessDao.getAllByProject(projectId);
     }
 
     @Override

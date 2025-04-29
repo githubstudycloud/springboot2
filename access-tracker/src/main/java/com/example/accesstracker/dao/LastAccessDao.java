@@ -32,6 +32,17 @@ public interface LastAccessDao {
     LastAccess getByUser(String logUser);
     
     /**
+     * Get last access record by user ID, project ID, and version
+     * @param logUser the user ID
+     * @param projectId the project ID
+     * @param versionpbi the version PBI
+     * @return the last access record
+     */
+    LastAccess getByUserAndProject(@Param("logUser") String logUser, 
+                                   @Param("projectId") String projectId,
+                                   @Param("versionpbi") String versionpbi);
+    
+    /**
      * Check if a user has accessed today
      * @param logUser the user ID
      * @param accessDate the access date
@@ -51,4 +62,11 @@ public interface LastAccessDao {
      * @return all last access records
      */
     List<LastAccess> getAll();
+    
+    /**
+     * Get all last access records for a project
+     * @param projectId the project ID
+     * @return all last access records for the project
+     */
+    List<LastAccess> getAllByProject(String projectId);
 }

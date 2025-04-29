@@ -5,19 +5,30 @@
         <id column="id" property="id" />
         <result column="log_user" property="logUser" />
         <result column="uuid" property="uuid" />
+        <result column="project_id" property="projectId" />
+        <result column="versionpbi" property="versionpbi" />
         <result column="access_date" property="accessDate" />
-        <result column="start_time" property="startTime" />
-        <result column="end_time" property="endTime" />
+        <result column="first_access_time" property="firstAccessTime" />
+        <result column="last_access_time" property="lastAccessTime" />
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, log_user, uuid, access_date, start_time, end_time
+        id, log_user, uuid, project_id, versionpbi, access_date, first_access_time, last_access_time
     </sql>
 
     <insert id="insert" parameterType="com.example.accesstracker.entity.HistoryAccess" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO history_access (log_user, uuid, access_date, start_time, end_time)
-        VALUES (#{logUser}, #{uuid}, #{accessDate}, #{startTime}, #{endTime})
+        INSERT INTO history_access (log_user, uuid, project_id, versionpbi, access_date, first_access_time, last_access_time)
+        VALUES (#{logUser}, #{uuid}, #{projectId}, #{versionpbi}, #{accessDate}, #{firstAccessTime}, #{lastAccessTime})
     </insert>
+    
+    <update id="updateLastAccessTime" parameterType="com.example.accesstracker.entity.HistoryAccess">
+        UPDATE history_access
+        SET last_access_time = #{lastAccessTime}
+        WHERE log_user = #{logUser} 
+          AND project_id = #{projectId} 
+          AND versionpbi = #{versionpbi} 
+          AND access_date = #{accessDate}
+    </update>
 
     <select id="getByUserAndDate" resultMap="BaseResultMap">
         SELECT
@@ -25,11 +36,24 @@
         FROM history_access
         WHERE log_user = #{logUser} AND access_date = #{accessDate}
     </select>
+    
+    <select id="getByUserProjectAndDate" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM history_access
+        WHERE log_user = #{logUser} 
+          AND project_id = #{projectId} 
+          AND versionpbi = #{versionpbi} 
+          AND access_date = #{accessDate}
+    </select>
 
     <select id="hasHistoryForDate" resultType="java.lang.Boolean">
         SELECT COUNT(1) > 0
         FROM history_access
-        WHERE log_user = #{logUser} AND access_date = #{accessDate}
+        WHERE log_user = #{logUser} 
+          AND project_id = #{projectId} 
+          AND versionpbi = #{versionpbi} 
+          AND access_date = #{accessDate}
     </select>
 
     <select id="getAllByUser" resultMap="BaseResultMap">
@@ -38,6 +62,14 @@
         FROM history_access
         WHERE log_user = #{logUser}
         ORDER BY access_date DESC
+    </select>
+    
+    <select id="getAllByProject" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM history_access
+        WHERE project_id = #{projectId}
+        ORDER BY access_date DESC, log_user
     </select>
 
     <select id="getByDateRange" resultMap="BaseResultMap">

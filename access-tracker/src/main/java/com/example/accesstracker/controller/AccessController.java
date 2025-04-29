@@ -31,16 +31,21 @@ public class AccessController {
     /**
      * Record a user's access
      * @param logUser the user identifier
+     * @param projectId the project identifier
+     * @param versionpbi the version PBI
      * @return success/failure response
      */
     @PostMapping("/record")
-    public ResponseEntity<Map<String, Object>> recordAccess(@RequestParam("logUser") String logUser) {
+    public ResponseEntity<Map<String, Object>> recordAccess(
+            @RequestParam("logUser") String logUser,
+            @RequestParam("projectId") String projectId,
+            @RequestParam("versionpbi") String versionpbi) {
         Map<String, Object> response = new HashMap<>();
         
         // Generate a UUID for this session
         String uuid = UUID.randomUUID().toString();
         
-        boolean result = accessService.recordAccess(logUser, uuid);
+        boolean result = accessService.recordAccess(logUser, uuid, projectId, versionpbi);
         
         response.put("success", result);
         response.put("uuid", uuid);
@@ -53,15 +58,19 @@ public class AccessController {
      * Update the end time of a user's session
      * @param logUser the user identifier
      * @param uuid the session UUID
+     * @param projectId the project identifier
+     * @param versionpbi the version PBI
      * @return success/failure response
      */
     @PutMapping("/end")
     public ResponseEntity<Map<String, Object>> endSession(
             @RequestParam("logUser") String logUser,
-            @RequestParam("uuid") String uuid) {
+            @RequestParam("uuid") String uuid,
+            @RequestParam("projectId") String projectId,
+            @RequestParam("versionpbi") String versionpbi) {
         Map<String, Object> response = new HashMap<>();
         
-        boolean result = accessService.updateEndTime(logUser, uuid);
+        boolean result = accessService.updateEndTime(logUser, uuid, projectId, versionpbi);
         
         response.put("success", result);
         response.put("timestamp", System.currentTimeMillis());
@@ -84,6 +93,28 @@ public class AccessController {
         
         return ResponseEntity.ok(lastAccess);
     }
+    
+    /**
+     * Get a user's last access record for a specific project
+     * @param logUser the user identifier
+     * @param projectId the project identifier
+     * @param versionpbi the version PBI
+     * @return the last access record
+     */
+    @GetMapping("/last/project")
+    public ResponseEntity<LastAccess> getLastAccessByProject(
+            @RequestParam("logUser") String logUser,
+            @RequestParam("projectId") String projectId,
+            @RequestParam("versionpbi") String versionpbi) {
+        
+        LastAccess lastAccess = accessService.getLastAccessByUserAndProject(logUser, projectId, versionpbi);
+        
+        if (lastAccess == null) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        return ResponseEntity.ok(lastAccess);
+    }
 
     /**
      * Get a user's access history
@@ -93,6 +124,18 @@ public class AccessController {
     @GetMapping("/history/user/{logUser}")
     public ResponseEntity<List<HistoryAccess>> getUserHistory(@PathVariable("logUser") String logUser) {
         List<HistoryAccess> historyList = accessService.getUserHistory(logUser);
+        
+        return ResponseEntity.ok(historyList);
+    }
+    
+    /**
+     * Get a project's access history
+     * @param projectId the project identifier
+     * @return list of history access records
+     */
+    @GetMapping("/history/project/{projectId}")
+    public ResponseEntity<List<HistoryAccess>> getProjectHistory(@PathVariable("projectId") String projectId) {
+        List<HistoryAccess> historyList = accessService.getProjectHistory(projectId);
         
         return ResponseEntity.ok(historyList);
     }

@@ -5,27 +5,28 @@
         <id column="id" property="id" />
         <result column="log_user" property="logUser" />
         <result column="uuid" property="uuid" />
+        <result column="project_id" property="projectId" />
+        <result column="versionpbi" property="versionpbi" />
         <result column="access_date" property="accessDate" />
-        <result column="start_time" property="startTime" />
-        <result column="end_time" property="endTime" />
+        <result column="first_access_time" property="firstAccessTime" />
+        <result column="last_access_time" property="lastAccessTime" />
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, log_user, uuid, access_date, start_time, end_time
+        id, log_user, uuid, project_id, versionpbi, access_date, first_access_time, last_access_time
     </sql>
 
     <insert id="insert" parameterType="com.example.accesstracker.entity.LastAccess" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO last_access (log_user, uuid, access_date, start_time, end_time)
-        VALUES (#{logUser}, #{uuid}, #{accessDate}, #{startTime}, #{endTime})
+        INSERT INTO last_access (log_user, uuid, project_id, versionpbi, access_date, first_access_time, last_access_time)
+        VALUES (#{logUser}, #{uuid}, #{projectId}, #{versionpbi}, #{accessDate}, #{firstAccessTime}, #{lastAccessTime})
     </insert>
 
     <update id="update" parameterType="com.example.accesstracker.entity.LastAccess">
         UPDATE last_access
         SET uuid = #{uuid},
             access_date = #{accessDate},
-            start_time = #{startTime},
-            end_time = #{endTime}
-        WHERE log_user = #{logUser}
+            last_access_time = #{lastAccessTime}
+        WHERE log_user = #{logUser} AND project_id = #{projectId} AND versionpbi = #{versionpbi}
     </update>
 
     <select id="getByUser" resultMap="BaseResultMap">
@@ -33,6 +34,13 @@
         <include refid="Base_Column_List" />
         FROM last_access
         WHERE log_user = #{logUser}
+    </select>
+    
+    <select id="getByUserAndProject" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM last_access
+        WHERE log_user = #{logUser} AND project_id = #{projectId} AND versionpbi = #{versionpbi}
     </select>
 
     <select id="hasAccessedToday" resultType="java.lang.Boolean">
@@ -50,5 +58,12 @@
         SELECT
         <include refid="Base_Column_List" />
         FROM last_access
+    </select>
+    
+    <select id="getAllByProject" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM last_access
+        WHERE project_id = #{projectId}
     </select>
 </mapper>

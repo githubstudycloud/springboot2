@@ -2,7 +2,7 @@ package com.example.accesstracker.entity;
 
 import lombok.Data;
 import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 /**
  * Entity for the history access table
@@ -13,7 +13,9 @@ public class HistoryAccess {
     private Long id;
     private String logUser; // User ID or username
     private String uuid; // Unique identifier for the visit session
+    private String projectId; // Project identifier
+    private String versionpbi; // Version PBI identifier
     private LocalDate accessDate; // Visit date (year, month, day)
-    private LocalTime startTime; // Start time of the first visit of the day
-    private LocalTime endTime; // End time of the first visit of the day
+    private LocalDateTime firstAccessTime; // First access datetime of the day
+    private LocalDateTime lastAccessTime; // Last access datetime of the day
 }
