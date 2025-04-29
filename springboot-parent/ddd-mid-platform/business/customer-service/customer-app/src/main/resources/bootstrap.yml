@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: customer-service
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+        namespace: public
+        group: DEFAULT_GROUP
+      config:
+        server-addr: 127.0.0.1:8848
+        file-extension: yaml
+        namespace: public
+        group: DEFAULT_GROUP
+        refresh-enabled: true
+        # 共享配置
+        shared-configs:
+          - data-id: common-mysql.yaml
+            group: DEFAULT_GROUP
+            refresh: true
+          - data-id: common-redis.yaml
+            group: DEFAULT_GROUP
+            refresh: true
+  # 配置环境
+  profiles:
+    active: dev
