@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.accesstracker.dao.LastAccessDao">
+    <resultMap id="BaseResultMap" type="com.example.accesstracker.entity.LastAccess">
+        <id column="id" property="id" />
+        <result column="log_user" property="logUser" />
+        <result column="uuid" property="uuid" />
+        <result column="access_date" property="accessDate" />
+        <result column="start_time" property="startTime" />
+        <result column="end_time" property="endTime" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, log_user, uuid, access_date, start_time, end_time
+    </sql>
+
+    <insert id="insert" parameterType="com.example.accesstracker.entity.LastAccess" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO last_access (log_user, uuid, access_date, start_time, end_time)
+        VALUES (#{logUser}, #{uuid}, #{accessDate}, #{startTime}, #{endTime})
+    </insert>
+
+    <update id="update" parameterType="com.example.accesstracker.entity.LastAccess">
+        UPDATE last_access
+        SET uuid = #{uuid},
+            access_date = #{accessDate},
+            start_time = #{startTime},
+            end_time = #{endTime}
+        WHERE log_user = #{logUser}
+    </update>
+
+    <select id="getByUser" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM last_access
+        WHERE log_user = #{logUser}
+    </select>
+
+    <select id="hasAccessedToday" resultType="java.lang.Boolean">
+        SELECT COUNT(1) > 0
+        FROM last_access
+        WHERE log_user = #{logUser} AND access_date = #{accessDate}
+    </select>
+
+    <delete id="deleteByUser">
+        DELETE FROM last_access
+        WHERE log_user = #{logUser}
+    </delete>
+
+    <select id="getAll" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM last_access
+    </select>
+</mapper>

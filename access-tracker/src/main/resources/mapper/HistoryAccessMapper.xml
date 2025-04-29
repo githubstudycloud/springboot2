@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.accesstracker.dao.HistoryAccessDao">
+    <resultMap id="BaseResultMap" type="com.example.accesstracker.entity.HistoryAccess">
+        <id column="id" property="id" />
+        <result column="log_user" property="logUser" />
+        <result column="uuid" property="uuid" />
+        <result column="access_date" property="accessDate" />
+        <result column="start_time" property="startTime" />
+        <result column="end_time" property="endTime" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, log_user, uuid, access_date, start_time, end_time
+    </sql>
+
+    <insert id="insert" parameterType="com.example.accesstracker.entity.HistoryAccess" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO history_access (log_user, uuid, access_date, start_time, end_time)
+        VALUES (#{logUser}, #{uuid}, #{accessDate}, #{startTime}, #{endTime})
+    </insert>
+
+    <select id="getByUserAndDate" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM history_access
+        WHERE log_user = #{logUser} AND access_date = #{accessDate}
+    </select>
+
+    <select id="hasHistoryForDate" resultType="java.lang.Boolean">
+        SELECT COUNT(1) > 0
+        FROM history_access
+        WHERE log_user = #{logUser} AND access_date = #{accessDate}
+    </select>
+
+    <select id="getAllByUser" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM history_access
+        WHERE log_user = #{logUser}
+        ORDER BY access_date DESC
+    </select>
+
+    <select id="getByDateRange" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM history_access
+        WHERE access_date BETWEEN #{startDate} AND #{endDate}
+        ORDER BY access_date DESC, log_user
+    </select>
+</mapper>
